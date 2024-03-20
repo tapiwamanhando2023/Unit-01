@@ -1,3 +1,16 @@
+#include <Adafruit_NeoPixel.h>
+
+#define PIN 13
+#define NUMPIXELS 4
+
+#define LEFT_BACK_LED 0
+#define LEFT_FRONT_LED 3
+
+#define RIGHT_BACK_LED 1
+#define RIGHT_FRONT_LED 2
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
 #define ROTATION_SENSOR_LEFT 2  //R1 - 2 - left wheel - red
 #define ROTATION_SENSOR_RIGHT 3 //R2 - 3 - right wheel - red
 
@@ -25,6 +38,9 @@ void ISR_R(){
 }
 
 void setup() {
+  strip.begin();
+  strip.show();
+
   pinMode(LEFT_WHEEL_FORWARD, OUTPUT);
   pinMode(LEFT_WHEEL_BACKWARDS, OUTPUT);
 
@@ -64,6 +80,7 @@ void checkSensorsValues(){
 }
 
 void turnRight(){
+  colorTurnRight();
   countL=0;
   countR=0;
   while(countL < 10 && countR < 10){
@@ -83,6 +100,7 @@ void turnRight(){
 }
 
 void turnLeft(){
+  colorTurnLeft();
   countL=0;
   countR=0;
   while(countL < 10 && countR < 10){
@@ -103,6 +121,8 @@ void turnLeft(){
 }
 
 void beforeTurn(){
+  colorForward();
+
   countL=0;
   countR=0;
   while(countL < 12 && countR < 12){
@@ -119,25 +139,26 @@ void beforeTurn(){
     if(sensors[7]){
       beforeTurn();
       turnRight();
-      }
+    }
       
     else if(!sensors[0]&&!sensors[1]&&!sensors[2]&&!sensors[3]&&!sensors[4]&&!sensors[5]&&!sensors[6]&&!sensors[7]){
         beforeTurn();
         turnLeft();
-        }
+    }
     else{
-          if(sensors[6]){
-            analogWrite(LEFT_WHEEL_FORWARD, 255);
+      colorForward();
+         if(sensors[6]){
+         analogWrite(LEFT_WHEEL_FORWARD, 255);
             analogWrite(LEFT_WHEEL_BACKWARDS, 0);
             analogWrite(RIGHT_WHEEL_FORWARD, 140);
             analogWrite(RIGHT_WHEEL_BACKWARDS, 0);
-            }
+          }
         else if(sensors[1]){
             analogWrite(LEFT_WHEEL_FORWARD, 140);
             analogWrite(LEFT_WHEEL_BACKWARDS, 0);
             analogWrite(RIGHT_WHEEL_FORWARD, 255);
             analogWrite(RIGHT_WHEEL_BACKWARDS, 0);
-            }
+        }
         else if(sensors[5]){
             analogWrite(LEFT_WHEEL_FORWARD, 255);
             analogWrite(LEFT_WHEEL_BACKWARDS, 0);
@@ -168,5 +189,43 @@ void beforeTurn(){
             analogWrite(RIGHT_WHEEL_FORWARD, 255);
             analogWrite(RIGHT_WHEEL_BACKWARDS, 0);
             }
-        }
+ }
+}
+
+//Left side yellow, right side green
+void colorTurnLeft() {
+  strip.setPixelColor(LEFT_BACK_LED, strip.Color(204,204,0));
+  strip.setPixelColor(LEFT_FRONT_LED, strip.Color(204,204,0));
+
+  strip.setPixelColor(RIGHT_BACK_LED, strip.Color(255,0,0));
+  strip.setPixelColor(RIGHT_FRONT_LED, strip.Color(255,0,0));
+
+  strip.show();
+}
+
+//Left side green, right side yellow
+void colorTurnRight() {
+  strip.setPixelColor(LEFT_BACK_LED, strip.Color(255, 0, 0));
+  strip.setPixelColor(LEFT_FRONT_LED, strip.Color(255, 0, 0));
+
+  strip.setPixelColor(RIGHT_BACK_LED, strip.Color(204,204,0));
+  strip.setPixelColor(RIGHT_FRONT_LED, strip.Color(204,204,0));
+
+  strip.show();
+}
+
+//All red
+void colorStop() {
+    for(int i = 0; i < strip.numPixels(); i++) {
+    strip.setPixelColor(i, strip.Color(0,255,0));
   }
+  strip.show();
+}
+
+//All green
+void colorForward() {
+    for(int i = 0; i < strip.numPixels(); i++) {
+    strip.setPixelColor(i, strip.Color(255,0,0));
+  }
+  strip.show();
+}
